@@ -1,4 +1,4 @@
-# rstudio on gcp VMs with a portable personal disk
+# using rstudio and jupyterlab on gcp VMs with a portable personal disk
 
 ## 1. create a personal disk
 - use gcp web ui to create a personal disk. This disk will hold all your data (being activly analyzed, not archival) and R libraries. Also, this disk can be resized later if needed.
