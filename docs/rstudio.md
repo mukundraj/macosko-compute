@@ -18,7 +18,7 @@
 
     `-m|--memory` : This argument has default value 16g. Adjuct based on maximum memory to reserve for container.
 
-    `-i|--image` : This argument has default value `std` to included preintalled libraries like Seurat. If `basic` is passed, then no libraries are preinstalled. Any packages installed in `basic` image would be ported to another VM along with personal disk.
+    `-i|--image` : This argument has default value `std` to included preintalled libraries like Seurat. If `basic` is passed, then no libraries are preinstalled. Packages installed within a container running `basic` image would be ported to another VM along with personal disk.
 
     example usage with parameters:
 
