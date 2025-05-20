@@ -1,8 +1,3 @@
-# mods by mraj start
-
-GET_PORT='HOST_IP=$(wget -qO- http://ipecho.net/plain) ; 
-          PORT_NUM=$(for port in {8901..8920}; do ss -an | grep -q :$port || { echo $port; break; }; done) ; 
-	            echo -e "*****************\n$HOST_IP:$PORT_NUM\n*****************"'
 
 MOUNTDIR=/mnt/disks/$(id -un)
 RSTUDIO_PATH=$MOUNTDIR/rstudio
@@ -767,4 +762,3 @@ NEW_UID=$2
 
 export EDITOR=vi
 
-# mods by mraj end

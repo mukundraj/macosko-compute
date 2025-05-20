@@ -18,7 +18,7 @@
 
     `-m|--memory` : This argument has default value 16g. Adjuct based on maximum memory to reserve for container.
 
-    `-i|--image` : This argument has default value `std` to included preintalled libraries like Seurat. If `basic` is passed, then no libraries are preinstalled. Any packages installed in `basic` image would be ported to another VM along with personal disk.
+    `-i|--image` : This argument has default value `std` to included preintalled libraries like Seurat. If `basic` is passed, then no libraries are preinstalled. Packages installed within a container running `basic` image would be ported to another VM along with personal disk.
 
     example usage with parameters:
 
@@ -37,30 +37,7 @@
 
 ### one time setup
 
-- create a personal VM. While creating it, set ./src/startup-instance.sh as a startup script.
-- log in to personal vm
-- ensure your userid on the personal VM is same as in the shared VM by entering the following command on both machines. If your userid is different on both machines, see appendix to change userid on your *personal* VM
-    ```
-    id -u
-    ```
-- vm setup
-    ```
-    sudo apt update
-    sudo apt install git -y
-    git clone https://github.com/mukundraj/macosko-compute
-    cd macosko-compute
-    bash ./src/setup-instance.sh
-    ```
-- unmount personal disk from `highmem1` machine if currently mounted. Run following command on a `highmem1` console.
-    ```
-    unmountdisk <disk-name>
-    ```
-- detach personal disk from VM `highmem1` machine if currently attached (use gcp web ui)
-- attach personal disk to personal VM  (use gcp web ui)
-- mount personal disk using following command. Run following command on a personal VM console.
-    ```
-    mountdisk <disk-name>
-    ```
+See [initial setup doc](/docs/initial.md)  
 
 ### for regular use
 
@@ -80,7 +57,7 @@ login page, use username ```root``` and password to be _your_ username.
 ## 3. project management using renv
 - renv can be used from within rstudio to manage separate library installations
 for different projects. Create project directories inside the
-```/rstudio/workdir``` from within rstudio.
+```/workdir``` from within rstudio.
 
 ## Appendix
 
