@@ -121,7 +121,7 @@ domount(){
     fi
   fi
 
-  mkdir -p $RSTUDIO_PATH $RENV_CACHE_PATH $JUPYTER_PATH
+  mkdir -p $RSTUDIO_PATH $RENV_CACHE_PATH $JUPYTER_PATH $WORKDIR_PATH
 }
 
 # builds base image and user image if any doesn't already exist
