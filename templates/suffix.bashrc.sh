@@ -500,7 +500,7 @@ handle-stop(){
     fi
     # check if num_containers is one
     if [ $num_containers -eq 1 ]; then
-      CONTAINER_NAME=$(podman ps | grep $IDE | awk '{print $NF}')
+      CONTAINER_NAME=$(podman ps | grep $USER | grep $IDE | awk '{print $NF}')
       echo "detected container $CONTAINER_NAME"
       stop $IDE $CONTAINER_NAME
     else
