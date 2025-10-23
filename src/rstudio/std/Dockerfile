@@ -1,7 +1,7 @@
 FROM docker.io/rocker/rstudio
 
 # RUN sudo apt-get update && apt-get install -y libglpk-dev
-RUN apt-get update && apt-get install -y  \
+RUN apt-get update && apt-get install libglpk-dev -y  \
     sudo zip unzip less tree expect       \
     wget curl rsync socat                 \
     gdebi-core build-essential cmake pkg-config alien \
