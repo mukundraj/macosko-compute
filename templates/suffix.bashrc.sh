@@ -53,9 +53,9 @@ remount(){
   if [ -f $MOUNTSFILE ]; then
     echo "mounting from $MOUNTSFILE"
     while read line; do
-      DISK_NAME=$(echo $line | awk '{print $1}')
-      MOUNTDIR=$(echo $line | awk '{print $2}')
-      echo mounting $DISK_NAME at $MOUNTDIR
+      local DISK_NAME=$(echo $line | awk '{print $1}')
+      local MOUNT_PT=$(echo $line | awk '{print $2}')
+      echo mounting $DISK_NAME at $MOUNT_PT
       mountdisk $DISK_NAME
     done < $MOUNTSFILE
   else
@@ -1028,32 +1028,32 @@ mountdisk(){
     echo "detected $DISK_NAME at $DISK_ID"
 
     # check if disk is already mounted
-    MOUNTDIR=$(df -h | grep "/dev/$DISK_ID" | awk '{print $6}')
-    if [ ${#MOUNTDIR} -gt 0 ]; then
-      echo "disk $DISK_NAME is mounted at $MOUNTDIR"
+    local EXISTING_MOUNT=$(df -h | grep "/dev/$DISK_ID" | awk '{print $6}')
+    if [ ${#EXISTING_MOUNT} -gt 0 ]; then
+      echo "disk $DISK_NAME is mounted at $EXISTING_MOUNT"
       return 1
     fi
 
-    MOUNTDIR=/mnt/disks/$(id -un)
-    sudo mkdir -p $MOUNTDIR
-    f=$MOUNTDIR
+    local MOUNT_PT=/mnt/disks/$(id -un)
+    sudo mkdir -p $MOUNT_PT
+    f=$MOUNT_PT
     while [[ $f != / ]]; do sudo chmod a+w "$f"; f=$(dirname "$f"); done;
-    sudo mount -o discard,defaults /dev/$DISK_ID $MOUNTDIR
+    sudo mount -o discard,defaults /dev/$DISK_ID $MOUNT_PT
     # check for error
     if [ $? -ne 0 ]; then
-      echo "error while mounting $DISK_NAME at $MOUNTDIR"
+      echo "error while mounting $DISK_NAME at $MOUNT_PT"
       return 1
     fi
-    echo mounted $1 at $MOUNTDIR
+    echo mounted $1 at $MOUNT_PT
     echo setting permissions for $1
-    sudo chown -R $(id -u):$(id -g) $MOUNTDIR
+    sudo chown -R $(id -u):$(id -g) $MOUNT_PT
 
     echo 'updating mounts file'
     MOUNTSFILE="$HOME/.config/misc/mounts"
     mkdir -p $(dirname $MOUNTSFILE) && touch $MOUNTSFILE
     # add to mounts file
     if ! grep -q "$DISK_NAME" $MOUNTSFILE; then
-      echo "$DISK_NAME $MOUNTDIR" >> $MOUNTSFILE
+      echo "$DISK_NAME $MOUNT_PT" >> $MOUNTSFILE
       echo "added $DISK_NAME to mounts file"
     else
       echo "$DISK_NAME exists in mounts file"
@@ -1088,23 +1088,23 @@ mountdiskat(){
     echo "detected $DISK_NAME at $DISK_ID"
 
     # check if disk is already mounted
-    MOUNTDIR=$(df -h | grep "/dev/$DISK_ID" | awk '{print $6}')
-    if [ ${#MOUNTDIR} -gt 0 ]; then
-      echo "disk $DISK_NAME is mounted at $MOUNTDIR"
+    local EXISTING_MOUNT=$(df -h | grep "/dev/$DISK_ID" | awk '{print $6}')
+    if [ ${#EXISTING_MOUNT} -gt 0 ]; then
+      echo "disk $DISK_NAME is mounted at $EXISTING_MOUNT"
       return 1
     fi
 
-    MOUNTDIR=$2
-    sudo mkdir -p $MOUNTDIR
-    f=$MOUNTDIR
+    local MOUNT_PT=$2
+    sudo mkdir -p $MOUNT_PT
+    f=$MOUNT_PT
     while [[ $f != / ]]; do sudo chmod a+w "$f"; f=$(dirname "$f"); done;
-    sudo mount -o discard,defaults /dev/$DISK_ID $MOUNTDIR
+    sudo mount -o discard,defaults /dev/$DISK_ID $MOUNT_PT
     # check for error
     if [ $? -ne 0 ]; then
-      echo "error while mounting $DISK_NAME at $MOUNTDIR"
+      echo "error while mounting $DISK_NAME at $MOUNT_PT"
       return 1
     fi
-    echo mounted $1 at $MOUNTDIR
+    echo mounted $1 at $MOUNT_PT
     # echo setting permissions for $1
     # sudo chown -R $(id -u):$(id -g) $MOUNTDIR
 
@@ -1150,17 +1150,17 @@ unmountdisk(){
     return 1
   fi
 
-  MOUNTDIR=$(df -h | grep "/dev/$DISK_ID" | awk '{print $6}')
+  local MOUNT_PT=$(df -h | grep "/dev/$DISK_ID" | awk '{print $6}')
 
-  if [ ${#MOUNTDIR} -gt 0 ]; then
+  if [ ${#MOUNT_PT} -gt 0 ]; then
 
-    echo $1 detected at $MOUNTDIR
-    echo "unmounting $MOUNTDIR"
+    echo $1 detected at $MOUNT_PT
+    echo "unmounting $MOUNT_PT"
 	# sudo umount /mnt/disks/user-$(id -un)
-    sudo umount $MOUNTDIR
+    sudo umount $MOUNT_PT
     # check for error
     if [ $? -ne 0 ]; then
-      echo "error while unmounting $DISK_NAME at $MOUNTDIR"
+      echo "error while unmounting $DISK_NAME at $MOUNT_PT"
       return 1
     fi
 
