@@ -75,12 +75,13 @@ remount(){
 #   -e, --mmenv ENV     Specify micromamba environment (default: jupyterlab)
 #   -w, --workdir DIR   Specify workdir relative to MOUNTDIR (default: workdir)
 #   -x, --suffix SUFFIX Specify suffix for container name (default: empty)
+#   --rw                Mount additional volumes in read-write mode (default: read-only)
 # Returns:
-#   String with parameters in format "memory&volumes&image&setupmode&mmenv&workdir&suffix"
+#   String with parameters in format "memory&volumes&image&setupmode&mmenv&workdir&suffix&rwvol"
 getparams(){
 
 	 # options handling start
-	 local options=$(getopt -o "i:m:v:se:w:x:" --long "image:,memory:,volumes:,setupmode,mmenv:,workdir:,suffix:" -- "$@")
+	 local options=$(getopt -o "i:m:v:se:w:x:" --long "image:,memory:,volumes:,setupmode,mmenv:,workdir:,suffix:,rw" -- "$@")
 	if [ $? -ne 0 ]; then
 		echo "Error parsing options." >&2
 		return 1
@@ -95,6 +96,7 @@ getparams(){
   local mmenv=jupyterlab
   local workdir=workdir
   local suffix=""
+  local rwvol=false
 
 	while true; do
 		case "$1" in
@@ -138,6 +140,10 @@ getparams(){
 				suffix="$2"
 				shift 2
 				;;
+			--rw)
+				rwvol=true
+				shift
+				;;
 			--)
 				shift
 				break
@@ -150,7 +156,7 @@ getparams(){
 	done
 
   # important
-	echo "$memory&$volumes&$image&$setupmode&$mmenv&$workdir&$suffix" 
+	echo "$memory&$volumes&$image&$setupmode&$mmenv&$workdir&$suffix&$rwvol"
 
 }
 
@@ -496,7 +502,7 @@ start(){
     return 1
   fi
 
-  IFS="&" read -r memory volumes image setupmode mmenv workdir suffix <<< "$params"
+  IFS="&" read -r memory volumes image setupmode mmenv workdir suffix rwvol <<< "$params"
 
   echo startparams: $memory $volumes $image $setupmode $mmenv $workdir $suffix
 
@@ -541,7 +547,7 @@ rstudio(){
   if [ $? -ne 0 ]; then
     return 1
   fi
-  IFS="&" read -r memory dir_to_mount image setupmode mmenv workdir suffix <<< "$params"
+  IFS="&" read -r memory dir_to_mount image setupmode mmenv workdir suffix rwvol <<< "$params"
 
   # check if -s flag was used
   if [ "$setupmode" = "true" ]; then
@@ -567,6 +573,12 @@ rstudio(){
   if [ -n "$suffix" ]; then
     renv_cache_path="$MOUNTDIR/renvcacheV2/$suffix"
     echo "using renv cache path with suffix: $renv_cache_path"
+  fi
+
+  # Determine mount mode for additional volumes
+  local vol_mode="ro"
+  if [ "$rwvol" = "true" ]; then
+    vol_mode="rw"
   fi
 
   # identify BASE_IMAGE_PATH
@@ -596,9 +608,9 @@ rstudio(){
       ;;
   esac
 
-  # Add read-only mount for dir_to_mount if specified
+  # Add mount for dir_to_mount if specified (ro by default, rw with --rw flag)
   if [ -n "$dir_to_mount" ]; then
-    VOLS="$VOLS+-v+$dir_to_mount:$dir_to_mount:ro"
+    VOLS="$VOLS+-v+$dir_to_mount:$dir_to_mount:$vol_mode"
   fi
 
 
@@ -637,7 +649,7 @@ jupyter(){
   if [ $? -ne 0 ]; then
     return 1
   fi
-  IFS="&" read -r memory dir_to_mount image setupmode mmenv workdir suffix <<< "$params"
+  IFS="&" read -r memory dir_to_mount image setupmode mmenv workdir suffix rwvol <<< "$params"
 
   # check if -s flag was used
   if [ "$setupmode" = "true" ]; then
@@ -686,9 +698,13 @@ jupyter(){
       ;;
   esac
 
-  # Add read-only mount for dir_to_mount if specified
+  # Add mount for dir_to_mount if specified (ro by default, rw with --rw flag)
+  local vol_mode="ro"
+  if [ "$rwvol" = "true" ]; then
+    vol_mode="rw"
+  fi
   if [ -n "$dir_to_mount" ]; then
-    VOLS="$VOLS+-v+$dir_to_mount:$dir_to_mount:ro"
+    VOLS="$VOLS+-v+$dir_to_mount:$dir_to_mount:$vol_mode"
   fi
 
   
@@ -713,7 +729,7 @@ custom(){
   if [ $? -ne 0 ]; then
     return 1
   fi
-  IFS="&" read -r memory dir_to_mount image setupmode mmenv workdir suffix <<< "$params"
+  IFS="&" read -r memory dir_to_mount image setupmode mmenv workdir suffix rwvol <<< "$params"
 
   # check if -i flag was used
   if [ -n "$image" ]; then
@@ -756,9 +772,13 @@ custom(){
       ;;
   esac
 
-  # Add read-only mount for dir_to_mount if specified
+  # Add mount for dir_to_mount if specified (ro by default, rw with --rw flag)
+  local vol_mode="ro"
+  if [ "$rwvol" = "true" ]; then
+    vol_mode="rw"
+  fi
   if [ -n "$dir_to_mount" ]; then
-    VOLS="$VOLS+-v+$dir_to_mount:$dir_to_mount:ro"
+    VOLS="$VOLS+-v+$dir_to_mount:$dir_to_mount:$vol_mode"
   fi
 
 
@@ -793,7 +813,7 @@ custom2(){
   if [ $? -ne 0 ]; then
     return 1
   fi
-  IFS="&" read -r memory dir_to_mount image setupmode mmenv workdir suffix <<< "$params"
+  IFS="&" read -r memory dir_to_mount image setupmode mmenv workdir suffix rwvol <<< "$params"
 
   # check if -i flag was used
   if [ -n "$image" ]; then
@@ -836,9 +856,13 @@ custom2(){
       ;;
   esac
 
-  # Add read-only mount for dir_to_mount if specified
+  # Add mount for dir_to_mount if specified (ro by default, rw with --rw flag)
+  local vol_mode="ro"
+  if [ "$rwvol" = "true" ]; then
+    vol_mode="rw"
+  fi
   if [ -n "$dir_to_mount" ]; then
-    VOLS="$VOLS+-v+$dir_to_mount:$dir_to_mount:ro"
+    VOLS="$VOLS+-v+$dir_to_mount:$dir_to_mount:$vol_mode"
   fi
 
 
